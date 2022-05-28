@@ -51,7 +51,7 @@ namespace MIPT.VRM.Client
 
             this._vertexBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, this._vertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, this.Cube.Vertices.Length * sizeof(float), this.Cube.Vertices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, VrmObject.Vertices.Length * sizeof(float), VrmObject.Vertices, BufferUsageHint.StaticDraw);
             
             this._shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
             this._shader.Use();
@@ -100,7 +100,7 @@ namespace MIPT.VRM.Client
             this._shader.SetMatrix4("view", this._camera.GetViewMatrix());
             this._shader.SetMatrix4("projection", this._camera.GetProjectionMatrix());
 
-            GL.DrawArrays(PrimitiveType.Triangles, 0,(this.Cube.Vertices.Length / 6));
+            GL.DrawArrays(PrimitiveType.Triangles, 0,(VrmObject.Vertices.Length / 6));
 
             this.SwapBuffers();
         }
