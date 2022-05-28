@@ -11,6 +11,12 @@ namespace MIPT.VRM.Client
 {
     public class VrmWindow : GameWindow
     {
+        private readonly List<VrmObjectState> _states = new ()
+        {
+            new VrmObjectState(Guid.NewGuid(), Matrix4.Identity + Matrix4.CreateTranslation(-2 * Vector3.UnitX), 1.0f),
+            new VrmObjectState(Guid.NewGuid(), Matrix4.Identity + Matrix4.CreateTranslation(3 * Vector3.UnitX), 1.5f),
+        };
+        
         private readonly VrmObject Cube = new VrmObject();
         
         private int _elementBufferObject;
@@ -95,13 +101,18 @@ namespace MIPT.VRM.Client
             // this._texture2.Use(TextureUnit.Texture1);
             this._shader.Use();
 
-            var model = Matrix4.Identity * Matrix4.CreateRotationX((float)MathHelper.DegreesToRadians(this._time));
-            this._shader.SetMatrix4("model", model);
-            this._shader.SetMatrix4("view", this._camera.GetViewMatrix());
-            this._shader.SetMatrix4("projection", this._camera.GetProjectionMatrix());
+            foreach (var objectState in this._states)
+            {
+                var radians = (float)MathHelper.DegreesToRadians(this._time * objectState.Speed);
+                var model = objectState.Coord * Matrix4.CreateRotationX(radians);
 
-            GL.DrawArrays(PrimitiveType.Triangles, 0,(VrmObject.Vertices.Length / 6));
+                this._shader.SetMatrix4("model", model);
+                this._shader.SetMatrix4("view", this._camera.GetViewMatrix());
+                this._shader.SetMatrix4("projection", this._camera.GetProjectionMatrix());
 
+                GL.DrawArrays(PrimitiveType.Triangles, 0,(VrmObject.Vertices.Length / 6));
+            }
+            
             this.SwapBuffers();
         }
 
