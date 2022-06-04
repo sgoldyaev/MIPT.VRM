@@ -120,8 +120,6 @@ namespace MIPT.VRM.Client
         {
             base.OnUpdateFrame(e);
             
-            
-
             if (!this.IsFocused) // Check to see if the window is focused
             {
                 return;
