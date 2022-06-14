@@ -11,13 +11,14 @@ namespace MIPT.VRM.Client
 {
     public class VrmWindow : GameWindow
     {
-        private readonly List<VrmObjectState> _states = new ()
+        private readonly ReaderWriterLockSlim locker = new ReaderWriterLockSlim();
+
+        //private List<VrmObjectState> states;
+        private List<VrmObjectState> states = new ()
         {
-            new VrmObjectState(Guid.NewGuid(), Matrix4.Identity + Matrix4.CreateTranslation(-2 * Vector3.UnitX), 1.0f),
-            new VrmObjectState(Guid.NewGuid(), Matrix4.Identity + Matrix4.CreateTranslation(3 * Vector3.UnitX), 1.5f),
+            new VrmObjectState(1, Matrix4.Identity + Matrix4.CreateTranslation(-2 * Vector3.UnitX), 1.0f),
+            new VrmObjectState(2, Matrix4.Identity + Matrix4.CreateTranslation(3 * Vector3.UnitX), 1.5f),
         };
-        
-        private readonly VrmObject Cube = new VrmObject();
         
         private int _elementBufferObject;
 
@@ -38,6 +39,8 @@ namespace MIPT.VRM.Client
         private Vector2 _lastPos;
 
         private double _time;
+
+        public EventHandler<VrmCommand> OnCommand;
 
         public VrmWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
@@ -84,7 +87,7 @@ namespace MIPT.VRM.Client
             this._camera = new Camera(Vector3.UnitZ * 3, this.Size.X / (float)this.Size.Y);
 
             // We make the mouse cursor invisible and captured so we can have proper FPS-camera movement.
-            this.CursorGrabbed = true;
+            this.CursorGrabbed = false;
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -101,16 +104,23 @@ namespace MIPT.VRM.Client
             // this._texture2.Use(TextureUnit.Texture1);
             this._shader.Use();
 
-            foreach (var objectState in this._states)
+            this.locker.EnterReadLock();
+            var currentState = this.states;
+            this.locker.ExitReadLock();
+
+            if (currentState?.Any() == true)
             {
-                var radians = (float)MathHelper.DegreesToRadians(this._time * objectState.Speed);
-                var model = objectState.Coord * Matrix4.CreateRotationX(radians);
+                foreach (var objectState in currentState)
+                {
+                    var radians = (float)MathHelper.DegreesToRadians(this._time);
+                    var model = objectState.Coord * Matrix4.CreateRotationY(radians);
 
-                this._shader.SetMatrix4("model", model);
-                this._shader.SetMatrix4("view", this._camera.GetViewMatrix());
-                this._shader.SetMatrix4("projection", this._camera.GetProjectionMatrix());
+                    this._shader.SetMatrix4("model", model);
+                    this._shader.SetMatrix4("view", this._camera.GetViewMatrix());
+                    this._shader.SetMatrix4("projection", this._camera.GetProjectionMatrix());
 
-                GL.DrawArrays(PrimitiveType.Triangles, 0,(VrmObject.Vertices.Length / 6));
+                    GL.DrawArrays(PrimitiveType.Triangles, 0,(VrmObject.Vertices.Length / 6));
+                }
             }
             
             this.SwapBuffers();
@@ -131,6 +141,16 @@ namespace MIPT.VRM.Client
             {
                 this.Close();
             }
+
+            if (input.IsKeyDown(Keys.Up))
+            {
+                this.OnCommand?.Invoke(this, new VrmCommand(-1, Vector3.UnitY));
+            }
+            if (input.IsKeyDown(Keys.Down))
+            {
+                this.OnCommand?.Invoke(this, new VrmCommand(-1, -Vector3.UnitY));
+            }
+            
 
             const float cameraSpeed = 1.5f;
             const float sensitivity = 0.2f;
@@ -199,6 +219,13 @@ namespace MIPT.VRM.Client
 
             GL.Viewport(0, 0, this.Size.X, this.Size.Y);
             this._camera.AspectRatio = this.Size.X / (float)this.Size.Y;
+        }
+
+        public void Handle(params VrmObjectState[] message)
+        {
+            this.locker.EnterWriteLock();
+            this.states = new List<VrmObjectState>(message);
+            this.locker.ExitWriteLock();
         }
     }
 }

@@ -2,10 +2,16 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <LangVersion>10</LangVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MIPT.VRM.Common\MIPT.VRM.Common.csproj" />
+    <ProjectReference Include="..\MIPT.VRM.Sockets\MIPT.VRM.Sockets.csproj" />
+  </ItemGroup>
 
 </Project>

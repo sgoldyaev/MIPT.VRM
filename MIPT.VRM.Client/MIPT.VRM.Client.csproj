@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MIPT.VRM.Common\MIPT.VRM.Common.csproj" />
+    <ProjectReference Include="..\MIPT.VRM.Sockets\MIPT.VRM.Sockets.csproj" />
   </ItemGroup>
 
   <ItemGroup>

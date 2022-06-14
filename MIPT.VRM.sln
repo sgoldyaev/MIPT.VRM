@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MIPT.VRM.Common", "MIPT.VRM
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{5A3B0FAA-98F9-44CE-8C1E-634F3BFBD219}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MIPT.VRM.Sockets", "MIPT.VRM.Sockets\MIPT.VRM.Sockets.csproj", "{18F6EC8C-AA47-4036-915C-D00D81B3F236}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,18 @@ Global
 		{DDC4B644-DE8D-4D59-84AC-2B3E7E0E9895}.Release|x64.Build.0 = Release|x64
 		{DDC4B644-DE8D-4D59-84AC-2B3E7E0E9895}.Release|x86.ActiveCfg = Release|x86
 		{DDC4B644-DE8D-4D59-84AC-2B3E7E0E9895}.Release|x86.Build.0 = Release|x86
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Debug|x64.Build.0 = Debug|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Debug|x86.Build.0 = Debug|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Release|x64.ActiveCfg = Release|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Release|x64.Build.0 = Release|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Release|x86.ActiveCfg = Release|Any CPU
+		{18F6EC8C-AA47-4036-915C-D00D81B3F236}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
