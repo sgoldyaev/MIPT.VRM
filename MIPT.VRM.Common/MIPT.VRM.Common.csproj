@@ -21,4 +21,9 @@
     <Folder Include="Assets" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Resources\diffuse.png" />
+    <None Remove="Resources\model.dae" />
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
-﻿using OpenTK.Windowing.Desktop;
+﻿using System.Globalization;
+using OpenTK.Windowing.Desktop;
 
 namespace MIPT.VRM.Client
 {
@@ -6,6 +7,8 @@ namespace MIPT.VRM.Client
     {
         public static void Main(string[] args)
         {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            
             var gameWindowSettings = GameWindowSettings.Default;
             var nativeWindowSettings = NativeWindowSettings.Default;
 

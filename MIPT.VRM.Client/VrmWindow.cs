@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using MIPT.VRM.Client.Tools;
 using MIPT.VRM.Common.Entities;
+using MIPT.VRM.Common.Utils;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -16,20 +17,26 @@ namespace MIPT.VRM.Client
             new VrmObjectState(Guid.NewGuid(), Matrix4.Identity + Matrix4.CreateTranslation(-2 * Vector3.UnitX), 1.0f),
             new VrmObjectState(Guid.NewGuid(), Matrix4.Identity + Matrix4.CreateTranslation(3 * Vector3.UnitX), 1.5f),
         };
+
+        private MeshData meshData;
         
-        private readonly VrmObject Cube = new VrmObject();
-        
-        private int _elementBufferObject;
+        private int _indicesBufferObject;
 
         private int _vertexBufferObject;
+
+        private int _textureBufferObject;
+
+        private int _normalsBufferObject;
+
+        private int _jointsBufferObject;
+
+        private int _weightsBufferObject;
 
         private int _vertexArrayObject;
 
         private Shader _shader;
 
         private Texture _texture;
-
-        // private Texture _texture2;
 
         private Camera _camera;
 
@@ -46,6 +53,17 @@ namespace MIPT.VRM.Client
 
         protected override void OnLoad()
         {
+            var modelFile = new FileInfo("Resources/model.dae");
+            var textureFile = new FileInfo("Resources/diffuse.png");
+            var entityData = ColladaLoader.LoadColladaModel(modelFile, 50);
+            // Vao model = createVao(entityData.Mesh);
+            this.meshData = entityData.Mesh;
+            // Texture texture = loadTexture(textureFile);
+            var skeletonData = entityData.Joints;
+            // Joint headJoint = createJoints(skeletonData.HeadJoint);
+            // return new AnimatedModel(model, texture, headJoint, skeletonData.JointCount);
+
+            
             base.OnLoad();
 
             GL.ClearColor(Color.Olive);
@@ -55,21 +73,61 @@ namespace MIPT.VRM.Client
             this._vertexArrayObject = GL.GenVertexArray();
             GL.BindVertexArray(this._vertexArrayObject);
 
+            this._indicesBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, this._indicesBufferObject);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, meshData.Indices.Length * sizeof(int), meshData.Indices, BufferUsageHint.StaticDraw);
+
             this._vertexBufferObject = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, this._vertexBufferObject);
-            GL.BufferData(BufferTarget.ArrayBuffer, VrmObject.Vertices.Length * sizeof(float), VrmObject.Vertices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, meshData.Vertices.Length * sizeof(float), meshData.Vertices, BufferUsageHint.StaticDraw);
+            
+            this._textureBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, this._textureBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, meshData.TextureCoords.Length * sizeof(float), meshData.TextureCoords, BufferUsageHint.StaticDraw);
+            
+            this._normalsBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, this._normalsBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, meshData.Normals.Length * sizeof(float), meshData.Normals, BufferUsageHint.StaticDraw);
+            
+            this._jointsBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, this._jointsBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, meshData.JointIds.Length * sizeof(int), meshData.JointIds, BufferUsageHint.StaticDraw);
+            
+            this._weightsBufferObject = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, this._weightsBufferObject);
+            GL.BufferData(BufferTarget.ArrayBuffer, meshData.VertexWeights.Length * sizeof(float), meshData.VertexWeights, BufferUsageHint.StaticDraw);
+            
+            /*
+            this._shader = new Shader("Shaders/animatedEntityVertex.glsl", "Shaders/animatedEntityFragment.glsl");
+            this._shader.Use();
+
+            GL.EnableVertexAttribArray(this._vertexBufferObject);
+            GL.VertexAttribPointer(this._vertexBufferObject, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+            GL.EnableVertexAttribArray(this._textureBufferObject);
+            GL.VertexAttribPointer(this._textureBufferObject, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
+
+            GL.EnableVertexAttribArray(this._normalsBufferObject);
+            GL.VertexAttribPointer(this._normalsBufferObject, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+
+            GL.EnableVertexAttribArray(this._jointsBufferObject);
+            GL.VertexAttribPointer(this._jointsBufferObject, 3, VertexAttribPointerType.Int, false, 3 * sizeof(int), 0);
+
+            GL.EnableVertexAttribArray(this._weightsBufferObject);
+            GL.VertexAttribPointer(this._weightsBufferObject, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
+            */
             
             this._shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
             this._shader.Use();
 
             var vertexLocation = this._shader.GetAttribLocation("aPosition");
             GL.EnableVertexAttribArray(vertexLocation);
-            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
+            GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
 
             var colorLocation = this._shader.GetAttribLocation("aColor");
             GL.EnableVertexAttribArray(colorLocation);
-            GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
-
+            GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, false, 1 * sizeof(float), 3 * sizeof(float));
+            
             // this._texture = Texture.LoadFromFile("Resources/container.png");
             // this._texture.Use(TextureUnit.Texture0);
 
@@ -79,12 +137,15 @@ namespace MIPT.VRM.Client
             // this._shader.SetInt("texture0", 0);
             // this._shader.SetInt("texture1", 1);
 
+            _texture = Texture.LoadFromFile("Resources/diffuse.png");
+            _texture.Use(TextureUnit.Texture0);
+
             // We initialize the camera so that it is 3 units back from where the rectangle is.
             // We also give it the proper aspect ratio.
-            this._camera = new Camera(Vector3.UnitZ * 3, this.Size.X / (float)this.Size.Y);
+            this._camera = new Camera(Vector3.UnitZ * 2, this.Size.X / (float)this.Size.Y);
 
             // We make the mouse cursor invisible and captured so we can have proper FPS-camera movement.
-            this.CursorGrabbed = true;
+            this.CursorGrabbed = false;
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -97,20 +158,22 @@ namespace MIPT.VRM.Client
 
             GL.BindVertexArray(this._vertexArrayObject);
 
-            // this._texture.Use(TextureUnit.Texture0);
-            // this._texture2.Use(TextureUnit.Texture1);
+            this._texture.Use(TextureUnit.Texture0);
             this._shader.Use();
 
             foreach (var objectState in this._states)
             {
                 var radians = (float)MathHelper.DegreesToRadians(this._time * objectState.Speed);
-                var model = objectState.Coord * Matrix4.CreateRotationX(radians);
+                var model = objectState.Coord * Matrix4.CreateRotationY(radians);
 
+                /* */
                 this._shader.SetMatrix4("model", model);
                 this._shader.SetMatrix4("view", this._camera.GetViewMatrix());
                 this._shader.SetMatrix4("projection", this._camera.GetProjectionMatrix());
+                /* */
 
-                GL.DrawArrays(PrimitiveType.Triangles, 0,(VrmObject.Vertices.Length / 6));
+                GL.DrawArrays(PrimitiveType.Triangles, 0,this.meshData.Indices.Length / 3);
+                //GL.DrawElements(PrimitiveType.Triangles, this.meshData.Indices.Length, DrawElementsType.UnsignedInt, 0);
             }
             
             this.SwapBuffers();
